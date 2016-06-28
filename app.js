@@ -1,8 +1,8 @@
-var mysql	=require('mysql');
-var connection = mysql.createConnection({
-	host	: 'localhost',
-	user	: 'me',
-	password: 'secret',
+var mysql	= require('mysql');
+var connection	= mysql.createConnection({
+	host	: 'banya-mysql',
+	user	: 'root',
+	password: 'passwd',
 	database: 'my_db'
 });
 
