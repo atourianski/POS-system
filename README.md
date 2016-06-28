@@ -11,20 +11,28 @@ docker ps -a
 ## Create the DB
 ```bash
 docker exec -it banya-mysql bash
-stuff# mysql -u root -p
+root@contID# mysql -u root -ppasswd
 mysql > CREATE DATABASE banya;
-> exit
-stuff# exit
 ```
-Hop in the container, enter passwd on prompt. Start creating!
+Hop in the container, enter passwd on prompt. Start creating! Once ready to share updates...
 
 ## Dump & export
 ```bash
 docker exec banya-mysql mysqldump banya -uroot -ppasswd > dump.sql
 ```
+The file `dump.sql` is now on your local machine. Commit it and/or share it.
 
 ## Import the dump
-todo
+On another host, import the changes.
+
+```bash
+docker exec -it banya-mysql bash
+root@contID# mysql -u root -ppasswd
+mysql > CREATE DATABASE banya;
+mysql > exit
+root@contID# mysql -u root -ppasswd banya < dump.sql
+```
+The new/updated tables should be loaded!
 
 ### Resources
 - https://hub.docker.com/_/mysql/
