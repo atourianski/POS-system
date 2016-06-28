@@ -1,21 +1,16 @@
-
-//Lets require/import the HTTP module
-var http = require('http');
-
-//Lets define a port we want to listen to
-const PORT=8080; 
-
-//We need a function which handles requests and send response
-
-function handleRequest(request, response){
-    response.end('It Works!! Path Hit: ' + request.url);
-}
-
-//Create a server
-var server = http.createServer(handleRequest);
-
-//Lets start our server
-server.listen(PORT, function(){
-    //Callback triggered when server is successfully listening. Hurray!
-    console.log("Server listening on: http://localhost:%s", PORT);
+var mysql	=require('mysql');
+var connection = mysql.createConnection({
+	host	: 'localhost',
+	user	: 'me',
+	password: 'secret',
+	database: 'my_db'
 });
+
+connection.connect();
+
+connection.query('SELECT 1 + 1 AS solution', function(err, rows, fields) {
+	if (err) throw err;
+
+	console.log('The solution is: ', rows [0].solution);
+});
+connection.end();
