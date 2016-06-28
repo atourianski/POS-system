@@ -16,52 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `food`
---
-
-DROP TABLE IF EXISTS `food`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `food` (
-  `belyash` int(2) NOT NULL DEFAULT '5',
-  `cheb` int(2) DEFAULT NULL,
-  `borcht` int(2) DEFAULT NULL,
-  `salyan` int(2) DEFAULT NULL,
-  `fish_salyan` int(2) DEFAULT NULL,
-  `akrosh` int(2) DEFAULT NULL,
-  `harcho` int(2) DEFAULT NULL,
-  `pea` int(2) DEFAULT NULL,
-  `greek` int(2) DEFAULT NULL,
-  `beet` int(2) DEFAULT NULL,
-  `olivier` int(2) DEFAULT NULL,
-  `cake` int(2) DEFAULT NULL,
-  `pel` int(2) DEFAULT NULL,
-  `vareniki` int(2) DEFAULT NULL,
-  `salo` int(2) DEFAULT NULL,
-  `shuba` int(2) DEFAULT NULL,
-  `pastilla` int(2) DEFAULT NULL,
-  `fish` int(2) DEFAULT NULL,
-  `strog` int(2) DEFAULT NULL,
-  `kebab` int(2) DEFAULT NULL,
-  `veg_plate` int(2) DEFAULT NULL,
-  `plov` int(2) DEFAULT NULL,
-  `tabak` int(2) DEFAULT NULL,
-  `beef` int(2) DEFAULT NULL,
-  `kotlet` int(2) DEFAULT NULL,
-  `saus` int(2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `food`
---
-
-LOCK TABLES `food` WRITE;
-/*!40000 ALTER TABLE `food` DISABLE KEYS */;
-/*!40000 ALTER TABLE `food` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `foodstuffs`
 --
 
@@ -81,7 +35,7 @@ CREATE TABLE `foodstuffs` (
 
 LOCK TABLES `foodstuffs` WRITE;
 /*!40000 ALTER TABLE `foodstuffs` DISABLE KEYS */;
-INSERT INTO `foodstuffs` VALUES ('belyash',5,'fried meat donut'),('cheb',5,'cheburek, georgian deep fried savoury pastry'),('borcht',6,'russian soup'),('salyan',6,'russian soup');
+INSERT INTO `foodstuffs` VALUES ('belyash',5,'fried meat donut'),('cheb',5,'cheburek, georgian deep fried savoury pastry'),('borcht',6,'russian soup'),('salyan',6,'russian soup'),('fish_salyan',6,'russian soup'),('akrosh',6,'russian cold soup'),('harcho',6,'georgian soup'),('pea',6,'russian soup'),('greek',6,'greek salad'),('beet',6,'russian beet salad'),('olivier',6,'russian salad'),('cake',8,'dessert'),('pastilla',8,'dessert'),('pel',8,'pelmeni'),('vareniki',8,'potato or cherry perogies'),('salo',8,'russian cured pork'),('shuba',8,'russian herring salad'),('fish',12,'russian susdal baked fish'),('strog',12,'pork strogonoff'),('kebob',12,'lyolyakibabi, georgian lamb kebobs'),('veg_plate',12,'vegetarian plate'),('plov',12,'georgian lamb pilaf'),('tabak',15,'georgian, chicken tabaka'),('beef',15,'beef bourginion'),('kotlet',15,'russian chicken cutlets'),('saus',15,'sausages');
 /*!40000 ALTER TABLE `foodstuffs` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -146,4 +100,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-06-28 20:23:26
+-- Dump completed on 2016-06-28 23:43:50
