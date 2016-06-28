@@ -3,7 +3,7 @@ var connection	= mysql.createConnection({
 	host	: 'banya-mysql',
 	user	: 'root',
 	password: 'passwd',
-	database: 'my_db'
+	database: 'banya'
 });
 
 connection.connect();
