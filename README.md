@@ -30,4 +30,5 @@ todo
 - https://hub.docker.com/_/mysql/
 - http://www.luiselizondo.net/a-tutorial-on-how-to-use-mysql-with-docker/
 - https://www.digitalocean.com/community/tutorials/a-basic-mysql-tutorial
+- http://www.nkode.io/2014/09/12/easymysql.html
 
