@@ -23,9 +23,10 @@ docker exec banya-mysql mysqldump banya -uroot -ppasswd > dump.sql
 The file `dump.sql` is now on your local machine. Commit it and/or share it.
 
 ## Import the dump
-On another host, import the changes.
+On another host, import the changes. Assuming your db is running:
 
 ```bash
+docker cp dump.sql banya-mysql:.
 docker exec -it banya-mysql bash
 root@contID# mysql -u root -ppasswd
 mysql > CREATE DATABASE banya;

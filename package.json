@@ -4,6 +4,7 @@
   "description": "Point-Of-Sale System",
   "main": "app.js",
   "dependencies": {
+    "formidable": "^1.0.17",
     "mysql": "~2.11.1"
   },
   "devDependencies": {},
