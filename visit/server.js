@@ -14,13 +14,14 @@ var server = http.createServer(function (req, res) {
 });
 
 function displayForm(res) {
+    console.log("trying to display visit.html");
     fs.readFile('visit.html', function (err, data) {
         res.writeHead(200, {
             'Content-Type': 'text/html',
                 'Content-Length': data.length
         });
-        //res.write("WTF");
-        //res.end();
+        res.write(data);
+        res.end();
     });
 }
 
@@ -70,8 +71,8 @@ var createNewVisitCallback = function(err, fields) {
 	connection.connect();
 	console.log('connected, inserting row to visit  table.');
 
-	var sql = "INSERT INTO visit(date, ) VALUES (?, ?, ?)";
-	var inserts = [fields["name"], fields["price"], fields["notes"]];
+	var sql = "INSERT INTO visit (date, unique_id, bracelet_num, entry_time) VALUES (?, ?, ?, ?)";
+	var inserts = [getTodaysDate(), getUniqueID(), bnum, getTimeNow()];
 	sql = mysql.format(sql, inserts);
 
 	connection.query(sql, function(err, rows, fields) {
@@ -122,6 +123,11 @@ function getTimeNow() {
 
 }
 
+//]TODO GENERATE RANDOM NUMBER
 function getUniqueID() {
-	return "29671"
+	
+	var min = 10000;
+	var max = 99999;	
+
+	return Math.random() * (max - min) + min;
 }
