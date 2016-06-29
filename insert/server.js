@@ -19,8 +19,14 @@ function displayForm(res) {
             'Content-Type': 'text/html',
                 'Content-Length': data.length
         });
-        res.write(data);
-        res.end();
+    	//res.write(JSON.stringify(queryFood()));
+	var queryFood = function(callback) {
+	    callback(null, res)
+	};
+	queryFood(queryFoodCallback);
+	//console.log("rows are: ", queryFood());
+        //res.write("WTF");
+        //res.end();
     });
 }
 
@@ -33,14 +39,15 @@ function processFormFieldsIndividual(req, res) {
     var fields = [];
     var form = new formidable.IncomingForm();
     form.on('field', function (field, value) {
-	var writeNewVisit = function(callback) {
-	    callback(null, value)
-	};
-	writeNewVisit(writeNewVisitCallback);
 
-        //console.log(value);
- 	// [zr] is this necessary?
+       	//console.log(field);
+       	//console.log(value);
         fields[field] = value;
+       	console.log(fields);
+	var writeNewDish = function(callback) {
+	    callback(null, fields)
+	};
+	writeNewDish(writeNewDishCallback);
     });
 
     form.on('end', function () {
@@ -52,10 +59,10 @@ function processFormFieldsIndividual(req, res) {
     form.parse(req);
 }
 
-var writeNewVisitCallback = function(err, bnum) {
+var queryFoodCallback = function(err, res) {
 	if (err) throw err;
-	console.log('got bnum: '+bnum);
-	console.log('setting up visit...');
+
+	console.log("queryfooditems");
 	var connection	= mysql.createConnection({
 		host	: 'banya-mysql',
 		user	: 'root',
@@ -64,10 +71,46 @@ var writeNewVisitCallback = function(err, bnum) {
 	});
 	
 	connection.connect();
-	console.log('connected, inserting row to visit table.');
+	console.log('connected, querying all the foodstuffs.');
 
-	var sql = "INSERT INTO visit (date, unique_id, bracelet_num, entry_time) VALUES (?, ?, ?, ?)";
-	var inserts = [getTodaysDate(), getUniqueID(), bnum, getTimeNow()];
+	var sql = "SELECT * FROM foodstuffs"; 
+	connection.query(sql, function(err, rows, fields) {
+		if (err) throw err;
+		//console.log("rows are: ", rows);
+		//console.log("rows are stringified: ", JSON.stringify(rows));
+		//return JSON.stringify(rows); 
+		console.log("len: "+rows.length)
+		for(var i = 0; i < rows.length; i++) {
+			res.write("name: "+JSON.stringify(rows[i].name)+"<br>"); 
+			console.log("name: "+JSON.stringify(rows[i].name)+"<br>"); 
+			res.write("price: "+JSON.stringify(rows[i].price)+"<br>"); 
+			console.log("price: "+JSON.stringify(rows[i].price)+"<br>"); 
+		}
+		//res.write("name: "+JSON.stringify(rows[0].name)+"<br>"); 
+		//res.write("price: "+JSON.stringify(rows[0].price)+"<br>"); 
+		//res.write(JSON.stringify(rows[1].name)); 
+		//res.write(JSON.stringify(rows[1].price)); 
+        	res.end();
+	});
+	connection.end();
+}
+
+var writeNewDishCallback = function(err, fields) {
+	if (err) throw err;
+	console.log('fields: '+fields);
+	console.log('making new drink.');
+	var connection	= mysql.createConnection({
+		host	: 'banya-mysql',
+		user	: 'root',
+		password: 'passwd',
+		database: 'banya'
+	});
+	
+	connection.connect();
+	console.log('connected, inserting row to foodstuffs table.');
+
+	var sql = "INSERT INTO drinks (name, price, notes) VALUES (?, ?, ?)";
+	var inserts = [fields["name"], fields["price"], fields["notes"]];
 	sql = mysql.format(sql, inserts);
 
 	connection.query(sql, function(err, rows, fields) {
