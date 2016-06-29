@@ -16,6 +16,30 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `drinks`
+--
+
+DROP TABLE IF EXISTS `drinks`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `drinks` (
+  `name` varchar(20) DEFAULT NULL,
+  `price` int(2) DEFAULT NULL,
+  `notes` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `drinks`
+--
+
+LOCK TABLES `drinks` WRITE;
+/*!40000 ALTER TABLE `drinks` DISABLE KEYS */;
+INSERT INTO `drinks` VALUES ('bb',5,'bottled beer'),('draft',6,'Millst or Czechvar'),('Moscow Martini',9,'Vodka, homemade pickle brine'),('The Julius',9,'Vodka, pickle juice, clamato,worcestershire, lemon juice, celery salt'),('Red Orachard',9,'Vodka, cherry jam, amaretto, lemon juice'),('Honey Bison',9,'Zubrowka, honey, lemon juice'),('Blushing Anastasia',11,'Vodka, lemon juice, peach schnapps, cognac, cranberry juice, honey'),('Bloody Anastasia',11,'Vodka, fresh beetroot juice, sweet syrup, lemon juice'),('kvas',2,'fermented bread drink');
+/*!40000 ALTER TABLE `drinks` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `foodstuffs`
 --
 
@@ -100,4 +124,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-06-28 23:43:50
+-- Dump completed on 2016-06-29  0:53:36
