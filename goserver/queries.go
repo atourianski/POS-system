@@ -50,13 +50,13 @@ func addNewSession(braceletID string) error { // if not error, success!
 }
 
 type TheStructToFill struct {
-	admissionTime time.Time
-	admissions    []float64
-	purchases     []struct {
-		purchaseName string
-		price        float64
+	ArrivalTime time.Time
+	Admissions  []float64
+	Purchases   []struct {
+		PurchaseName string
+		Price        float64
 	}
-	total float64
+	Total float64
 }
 
 // will also need to return a struct populated with all the relevant info:
@@ -97,24 +97,24 @@ func getSessionInformation(braceletID string) error {
 }
 
 type AllTheThings struct {
-	drinks []struct {
-		drinkName  string
-		drinkPrice float64
+	Drinks []struct {
+		DrinkName  string
+		DrinkPrice float64
 	}
-	food []struct {
-		foodName  string
-		foodPrice float64
+	Food []struct {
+		FoodName  string
+		FoodPrice float64
 	}
-	massage []struct {
-		massageName  string
-		massagePrice float64
+	Massage []struct {
+		MassageName  string
+		MassagePrice float64
 	}
 
-	scrubs float64
+	Scrubs float64
 
-	misc []struct {
-		miscName  string
-		miscPrice float64
+	Misc []struct {
+		MiscName  string
+		MiscPrice float64
 	}
 }
 
