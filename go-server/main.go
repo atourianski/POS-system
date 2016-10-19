@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	//"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -18,7 +17,7 @@ var db *sql.DB
 var err error
 
 func main() {
-	// main shit
+	// connect to the db
 	db, err = sql.Open("mysql", "root:secure@tcp(172.17.0.2:3306)/banya")
 	if err != nil {
 		panic(err.Error())
@@ -30,34 +29,20 @@ func main() {
 		panic(err.Error())
 	}
 
-	// new user arrives. we call it a session & send in the bracelet ID
-	http.HandleFunc("/initializeSession", initializeSession)
-
-	// if adding new items, list them (keep track internally of the ID)
-	// TODO
-	// http.HandleFunc("/listAvailableItems", listAvailableItems)
-
-	// select some items from above and add them
-	http.HandleFunc("/addItemsToASession", addItemsToASession)
-
-	http.HandleFunc("/displayBill", displayBill)
-	http.HandleFunc("/closeBill", closeBill)
-
 	// file serving endpoints
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/newSession", newSession)
 	http.HandleFunc("/addItems", addItems)
 	http.HandleFunc("/closeSession", closeSession)
 
+	// places they route to
+	http.HandleFunc("/initializeSession", initializeSession)
+	http.HandleFunc("/addItemsToASession", addItemsToASession)
+	http.HandleFunc("/displayBill", displayBill)
+	http.HandleFunc("/closeBill", closeBill)
+
 	http.ListenAndServe(":8080", nil)
 }
-
-var defaultHTML = `<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title></title>
-</head>`
 
 type ActiveLockers struct {
 	Bracelet_num string
@@ -74,13 +59,37 @@ type DrinksAvailable struct {
 	Price string // convert to int...or marshal as such?
 }
 
+// TODO deduplicate / proper templates
+var defaultHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>`
+
+// TODO clean up &nbsp;
 var openSessionsHTML = `<h2>Open Sessions</h2>
 Entry Time | Locker Number<br>
 {{range $index, $element := .}}
 <b>{{ .Entry_time}}</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ .Bracelet_num}}<br>
 {{end}}`
 
-// TODO use some fucking templates
+// TODO deduplicate!
+var foodTemplate = `<b>Food:</b><br>
+{{range $index, $element := .}}
+{{ .Name}} $ {{ .Price}}<br>
+<input type="number" name="{{ .Name}}"><br>
+{{end}}
+<br>`
+
+var drinksTemplate = `<b>Drinks:</b><br>
+{{range $index, $element := .}}
+{{ .Name}} $ {{ .Price}}<br>
+<input type="number" name="{{ .Name}}"><br>
+{{end}}
+<br>
+`
+
 func homePage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "index.html")
 }
@@ -114,53 +123,42 @@ func newSession(w http.ResponseWriter, r *http.Request) {
 
 func addItems(w http.ResponseWriter, r *http.Request) {
 
-	foodTemplate := `<b>Food:</b><br>
-		{{range $index, $element := .}}
-		{{ .Name}} $ {{ .Price}}<br>
-		<input type="number" name="{{ .Name}}"><br>
-		{{end}}
-		<br>
-		`
-
+	// load food template
 	tFood := template.New("tFood")
 	tFood, err = tFood.Parse(foodTemplate)
 	if err != nil {
 		panic(err)
 	}
 
+	// get an array of "active" foods (on menu today)
 	Foods := getActiveFoodstuffs()
 
+	// render/execute template & spit out a string
 	var doc bytes.Buffer
 	if err := tFood.Execute(&doc, Foods); err != nil {
 		panic(err)
 	}
 	foodHTML := doc.String()
 
-	// ------------ TODO deduplicate w/ above ------
-
-	var drinksTemplate = `<b>Drinks:</b><br>
-		{{range $index, $element := .}}
-		{{ .Name}} $ {{ .Price}}<br>
-		<input type="number" name="{{ .Name}}"><br>
-		{{end}}
-		<br>
-		`
-
+	// load drinks template
 	tDrinks := template.New("tDrinks")
 	tDrinks, err = tDrinks.Parse(drinksTemplate)
 	if err != nil {
 		panic(err)
 	}
 
+	// get an array of "active" drinks (basically, all are on menu)
+	// some drinks can be disabled for w/e reason
 	Drinks := getActiveDrinks()
 
+	// render/execute template & spit out a string
 	var doc1 bytes.Buffer
 	if err := tDrinks.Execute(&doc1, Drinks); err != nil {
 		panic(err)
 	}
 	drinksHTML := doc1.String()
 
-	// the rendered display
+	// pack everything together & write to browser
 	var htmlToWrite = defaultHTML + `<body>
 	<h1>Add Some Items</h1>
 	<form method="POST" action="/addItemsToASession">
@@ -183,6 +181,7 @@ func addItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func closeSession(w http.ResponseWriter, r *http.Request) {
+	// html for closing a session, also a template
 	var tpl = defaultHTML + `<body>
 		<h1>Close A Session</h1>
 		<form method="POST" action="/displayBill">
@@ -193,18 +192,22 @@ func closeSession(w http.ResponseWriter, r *http.Request) {
 	</body>
 	</html>`
 
+	// get all active lockers / bracelets
 	Lockers := getActiveSession()
 
+	// init the template w/ tpl
 	t := template.New("t")
 	t, err = t.Parse(tpl)
 	if err != nil {
 		panic(err)
 	}
 
+	// execute template w/ Lockers
 	var doc bytes.Buffer
 	if err := t.Execute(&doc, Lockers); err != nil {
 		panic(err)
 	}
+	// write to browser
 	w.Write(doc.Bytes())
 }
 
@@ -218,7 +221,7 @@ func initializeSession(w http.ResponseWriter, r *http.Request) {
 			return // re-direct ... ?
 		}
 
-		// to be modified to allow scrubs/misc to be purchased on init
+		// TODO modify to allow scrubs/misc to be purchased on init
 		_, err = db.Exec("INSERT INTO invoices(bracelet_id, banya, food, drink, misc) values (?, ?, 0, 0, 0)", braceletID, "35")
 		if err != nil {
 			http.Error(w, fmt.Sprintf("error creating new invoice: %v", err), http.StatusInternalServerError)
@@ -232,12 +235,19 @@ func initializeSession(w http.ResponseWriter, r *http.Request) {
 		}
 
 		date := getFormattedDate()
-		// active => 1 => true
-		_, err = db.Exec("INSERT INTO visit(date, bracelet_num, entry_time, invoice_id, active) values (?, ?, ?, ?, ?)", date, braceletID, time.Now(), invoiceID, "1")
+
+		// hacky time calculation
+		// not sensitive to daylight savings
+		now := time.Now()
+		then := -(time.Hour * 4) // note the negative
+		timeNow := now.Add(then)
+
+		// initialize a visit
+		_, err = db.Exec("INSERT INTO visit(date, bracelet_num, entry_time, invoice_id, active) values (?, ?, ?, ?, ?)", date, braceletID, timeNow, invoiceID, "1") // active => 1 => true
 		if err != nil {
 			http.Error(w, fmt.Sprintf("error inserting new session: %v", err), http.StatusInternalServerError)
 		}
-
+		// need a success message ...
 		time.Sleep(time.Second * 1)
 		http.Redirect(w, r, "/", 301)
 	}
@@ -489,6 +499,12 @@ func getActiveDrinks() []*DrinksAvailable {
 }
 
 func getFormattedDate() string {
-	now := time.Now()
-	return fmt.Sprintf("%s-%s-%s", strconv.Itoa(now.Year()), strconv.Itoa(int(now.Month())), strconv.Itoa(now.Day()))
+	tz := "America/New_York"
+	location, err := time.LoadLocation(tz)
+	if err != nil {
+		panic(err)
+	}
+	now := time.Now().In(location)
+	return strings.Split(fmt.Sprintf("%s", now), " ")[0] // zero grabs the sql formatted date
+	//return fmt.Sprintf("%s-%s-%s", strconv.Itoa(now.Year()), strconv.Itoa(int(now.Month())), strconv.Itoa(now.Day()))
 }
