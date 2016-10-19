@@ -44,19 +44,33 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 
+type Visit struct {
+	Date      string
+	EntryTime time.Time
+	ExitTime  time.Time
+
+	BraceletID int
+	InvoiceID  int
+}
+
 type ActiveLockers struct {
 	Bracelet_num string
 	Entry_time   string
 }
 
 type FoodAvailable struct {
-	Name  string
-	Price string // convert to int...or marshal as such?
+	Menu   []Food
+	Drinks []Drink
 }
 
-type DrinksAvailable struct {
+type Food struct {
 	Name  string
-	Price string // convert to int...or marshal as such?
+	Price string // TODO: convert to int...or marshal as such?
+}
+
+type Drink struct {
+	Name  string
+	Price string // TODO: convert to int...or marshal as such?
 }
 
 // TODO deduplicate / proper templates
