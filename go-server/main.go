@@ -18,7 +18,7 @@ var err error
 
 func main() {
 	// connect to the db
-	db, err = sql.Open("mysql", "root:secure@tcp(172.17.0.2:3306)/banya")
+	db, err = sql.Open("mysql", "root:notSecure@tcp(172.17.0.2:3306)/banya")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -34,13 +34,16 @@ func main() {
 	http.HandleFunc("/newSession", newSession)
 	http.HandleFunc("/addItems", addItems)
 	http.HandleFunc("/closeSession", closeSession)
+	http.HandleFunc("/adminPage", adminPage)
 
 	// places they route to
 	http.HandleFunc("/initializeSession", initializeSession)
 	http.HandleFunc("/addItemsToASession", addItemsToASession)
 	http.HandleFunc("/displayBill", displayBill)
 	http.HandleFunc("/closeBill", closeBill)
+	http.HandleFunc("/selectTodaysMenu", selectTodaysMenu)
 
+	fmt.Println("Banya app started, listening on port 8080")
 	http.ListenAndServe(":8080", nil)
 }
 
@@ -223,6 +226,61 @@ func closeSession(w http.ResponseWriter, r *http.Request) {
 	}
 	// write to browser
 	w.Write(doc.Bytes())
+}
+
+func adminPage(w http.ResponseWriter, r *http.Request) {
+
+	thisAdminPage := defaultHTML + `<body>
+	<h1>Set foods for the day</h1>
+	<p>Select items from food database:</p><br>
+	<form method="POST" action="/selectTodaysMenu">
+	{{range $index, $element := .}}
+	<input type="checkbox" name="{{.Name}}">
+	{{ .Name}}<br>
+	{{end}}
+	<input type="submit" value="Submit"><br>
+	<br>
+	<a href="/">Home</a>`
+
+	allFoods := allAvailableFoodItems()
+
+	// init the template w/ tpl
+	t := template.New("t")
+	t, err := t.Parse(thisAdminPage)
+	if err != nil {
+		panic(err)
+	}
+
+	// execute template w/ allFoods
+	var doc bytes.Buffer
+	if err := t.Execute(&doc, allFoods); err != nil {
+		panic(err)
+	}
+	// write to browser
+	w.Write(doc.Bytes())
+}
+
+func selectTodaysMenu(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		_, err := db.Exec("UPDATE foodstuffs SET active=0")
+		if err != nil {
+			panic(err)
+		}
+
+		allFoods := allAvailableFoodItems()
+		for _, foodItem := range allFoods {
+			if r.FormValue(foodItem.Name) == "on" {
+
+				_, err := db.Exec("UPDATE foodstuffs SET active = 1 WHERE name=?", foodItem.Name)
+				if err != nil {
+					panic(err)
+				}
+			}
+		}
+	}
+
+	http.Redirect(w, r, "/addItems", 301)
+
 }
 
 func initializeSession(w http.ResponseWriter, r *http.Request) {
@@ -472,17 +530,17 @@ func getActiveSession() []*ActiveLockers {
 	return Lockers
 }
 
-func getActiveFoodstuffs() []*FoodAvailable {
-	rows, err := db.Query("SELECT name, price FROM foodstuffs WHERE active=1")
+func getActiveFoodstuffs() []*Food {
+	rows, err := db.Query("SELECT name, price FROM foodstuffs WHERE active=1 ORDER by price")
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
 
-	var Foods []*FoodAvailable
+	var Foods []*Food
 
 	for rows.Next() {
-		f := new(FoodAvailable)
+		f := new(Food)
 		err = rows.Scan(&f.Name, &f.Price)
 		if err != nil {
 			panic(err)
@@ -492,17 +550,17 @@ func getActiveFoodstuffs() []*FoodAvailable {
 	return Foods
 }
 
-func getActiveDrinks() []*DrinksAvailable {
-	rows, err := db.Query("SELECT name, price FROM drinks WHERE active=1")
+func getActiveDrinks() []*Drink {
+	rows, err := db.Query("SELECT name, price FROM drinks WHERE active=1 ORDER by price")
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
 
-	var Drinks []*DrinksAvailable
+	var Drinks []*Drink
 
 	for rows.Next() {
-		d := new(DrinksAvailable)
+		d := new(Drink)
 		err = rows.Scan(&d.Name, &d.Price)
 		if err != nil {
 			panic(err)
@@ -521,4 +579,25 @@ func getFormattedDate() string {
 	now := time.Now().In(location)
 	return strings.Split(fmt.Sprintf("%s", now), " ")[0] // zero grabs the sql formatted date
 	//return fmt.Sprintf("%s-%s-%s", strconv.Itoa(now.Year()), strconv.Itoa(int(now.Month())), strconv.Itoa(now.Day()))
+}
+
+func allAvailableFoodItems() []*Food {
+	rows, err := db.Query("SELECT name, price FROM foodstuffs")
+	if err != nil {
+		panic(err)
+	}
+
+	defer rows.Close()
+
+	var Foods []*Food
+
+	for rows.Next() {
+		f := new(Food)
+		err = rows.Scan(&f.Name, &f.Price)
+		if err != nil {
+			panic(err)
+		}
+		Foods = append(Foods, f)
+	}
+	return Foods
 }
